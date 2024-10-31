@@ -92,11 +92,14 @@ void RoverAckermann::Run()
 				}
 
 			} break;
-
+		case vehicle_status_s::NAVIGATION_STATE_OFFBOARD:
+		     _motor_setpoint = _ackermann_guidance.computeGuidance(_nav_state);
+		     break;  
 		case vehicle_status_s::NAVIGATION_STATE_AUTO_MISSION:
 		case vehicle_status_s::NAVIGATION_STATE_AUTO_RTL:
 			_motor_setpoint = _ackermann_guidance.computeGuidance(_nav_state);
 			break;
+		
 
 		default: // Unimplemented nav states will stop the rover
 			_motor_setpoint.steering = 0.f;

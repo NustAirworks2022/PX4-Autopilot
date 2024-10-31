@@ -49,6 +49,10 @@
 #include <uORB/topics/position_controller_status.h>
 #include <uORB/topics/mission_result.h>
 #include <uORB/topics/home_position.h>
+//changes
+#include <uORB/topics/trajectory_setpoint.h>
+#include <uORB/topics/vehicle_control_mode.h>
+
 
 // Standard library includes
 #include <matrix/matrix/math.hpp>
@@ -180,6 +184,12 @@ private:
 	uORB::Subscription _vehicle_attitude_sub{ORB_ID(vehicle_attitude)};
 	uORB::Subscription _mission_result_sub{ORB_ID(mission_result)};
 	uORB::Subscription _home_position_sub{ORB_ID(home_position)};
+    // changes
+    uORB::Subscription _trajectory_setpoint_sub{ORB_ID(trajectory_setpoint)};
+    uORB::Subscription _control_mode_sub{ORB_ID(vehicle_control_mode)}; /**< control mode subscription */
+    vehicle_control_mode_s _control_mode{};		/**< control mode */
+	//
+    trajectory_setpoint_s _trajectory_setpoint{};
 
 	// uORB publications
 	uORB::Publication<rover_ackermann_guidance_status_s> _rover_ackermann_guidance_status_pub{ORB_ID(rover_ackermann_guidance_status)};

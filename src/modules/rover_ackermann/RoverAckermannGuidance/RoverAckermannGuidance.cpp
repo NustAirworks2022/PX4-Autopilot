@@ -81,7 +81,8 @@ RoverAckermannGuidance::motor_setpoint RoverAckermannGuidance::computeGuidance(c
 	} else if (_distance_to_curr_wp < _acceptance_radius) { // Catch delay command
 		_desired_speed = 0.f;
 
-	} else { // Regular guidance algorithm
+    }
+    else { // Regular guidance algorithm
 
 		_desired_speed = calcDesiredSpeed(_wp_max_desired_vel, _param_ra_miss_vel_min.get(),
 						  _param_ra_miss_vel_gain.get(), _distance_to_prev_wp, _distance_to_curr_wp, _acceptance_radius,
@@ -115,6 +116,10 @@ RoverAckermannGuidance::motor_setpoint RoverAckermannGuidance::computeGuidance(c
 
 void RoverAckermannGuidance::updateSubscriptions()
 {
+	if (_control_mode_sub.updated()) {
+		_control_mode_sub.copy(&_control_mode);
+	}
+
 	if (_vehicle_global_position_sub.updated()) {
 		vehicle_global_position_s vehicle_global_position{};
 		_vehicle_global_position_sub.copy(&vehicle_global_position);
@@ -141,9 +146,12 @@ void RoverAckermannGuidance::updateSubscriptions()
 		_home_position = Vector2d(home_position.lat, home_position.lon);
 	}
 
-	if (_position_setpoint_triplet_sub.updated()) {
+	if (_position_setpoint_triplet_sub.updated() && !_control_mode.flag_control_offboard_enabled) {
 		updateWaypointsAndAcceptanceRadius();
 	}
+    if (_control_mode.flag_control_offboard_enabled){
+		updateWaypointsAndAcceptanceRadius();
+    }
 
 	if (_vehicle_attitude_sub.updated()) {
 		vehicle_attitude_s vehicle_attitude{};
@@ -185,6 +193,11 @@ void RoverAckermannGuidance::updateWaypointsAndAcceptanceRadius()
 	    && PX4_ISFINITE(position_setpoint_triplet.next.lon)) {
 		_next_wp = Vector2d(position_setpoint_triplet.next.lat, position_setpoint_triplet.next.lon);
 
+	}
+    if (_control_mode.flag_control_offboard_enabled) {
+        _trajectory_setpoint_sub.update(&_trajectory_setpoint);
+	_curr_wp=Vector2d(_trajectory_setpoint.position[0], _trajectory_setpoint.position[1]);
+        _next_wp =_curr_wp;
 	}
 
 	// NED waypoint coordinates
